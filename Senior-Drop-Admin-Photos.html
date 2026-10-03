@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Senior Drop — Admin</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
+:root{--ink:#111110;--paper:#f4f2ec;--accent:#d1481f;--muted:#6b675e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Work Sans',sans-serif;padding:18px}
+.wrap{max-width:1180px;margin:auto}
+h1,h2{font-family:Anton;text-transform:uppercase;margin:0}
+.mono{font-family:'Space Mono'}
+.btn{border:2px solid var(--ink);background:var(--ink);color:var(--paper);padding:10px 14px;cursor:pointer;font:700 .72rem 'Space Mono';text-transform:uppercase}
+.btn.alt{background:transparent;color:var(--ink)}
+.btn.danger{background:#8c2415;border-color:#8c2415}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+header{display:flex;justify-content:space-between;gap:15px;align-items:center;border-bottom:2px solid var(--ink);padding:10px 0 18px;flex-wrap:wrap}
+.logo{font:1.6rem Anton}.logo em{color:var(--accent);font-style:normal}
+.notice{margin:18px 0;padding:14px;border:2px solid var(--ink);line-height:1.5;font-size:.85rem}
+.tabs{display:flex;border-bottom:2px solid var(--ink);overflow:auto}
+.tab{border:0;background:transparent;padding:13px 16px;cursor:pointer;font:700 .72rem 'Space Mono'}
+.tab.active{background:var(--ink);color:var(--paper)}
+.view{display:none;padding:28px 0}.view.active{display:block}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--ink);border:2px solid var(--ink);margin-top:18px}
+.metric{padding:20px;background:var(--paper)}.metric b{display:block;font:2.3rem Anton}.metric span{font:.7rem 'Space Mono';color:var(--muted);text-transform:uppercase}
+.table-wrap{overflow:auto;border:2px solid var(--ink)}
+table{width:100%;border-collapse:collapse;min-width:850px}
+th,td{padding:12px;text-align:left;border-bottom:1px solid var(--ink)}
+th{background:var(--ink);color:var(--paper);font:.68rem 'Space Mono';text-transform:uppercase}
+.low{color:var(--accent);font-weight:700}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.small{padding:7px 9px;font-size:.62rem}
+.form{border:2px solid var(--ink);padding:20px;margin-top:18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field label{display:block;font:700 .68rem 'Space Mono';text-transform:uppercase;margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;padding:10px;border:2px solid var(--ink);background:var(--paper);color:var(--ink)}
+.field textarea{min-height:90px}.full{grid-column:1/-1}
+.order{border:2px solid var(--ink);padding:18px;margin-bottom:10px}
+.orderhead{display:flex;justify-content:space-between}
+.status{border:1px solid var(--accent);color:var(--accent);padding:3px 7px;font:.63rem 'Space Mono';text-transform:uppercase}
+.item{padding:8px 0;border-top:1px solid var(--ink);font-size:.83rem}
+.muted{color:var(--muted)}.error{color:#8c2415;font-weight:700;line-height:1.5}.success{color:#246b3a;font-weight:700}
+#loginMsg{margin-top:12px;min-height:20px}
+.product-thumb{width:58px;height:58px;object-fit:cover;border:2px solid var(--ink);display:block;background:#ddd}
+.no-photo{width:58px;height:58px;border:2px dashed var(--muted);display:flex;align-items:center;justify-content:center;font:700 .52rem 'Space Mono';text-align:center;color:var(--muted)}
+.photo-section{grid-column:1/-1;border-top:2px solid var(--ink);padding-top:18px;margin-top:4px}
+.photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+.photo-box{border:2px solid var(--ink);padding:12px;background:rgba(255,255,255,.18)}
+.photo-box h3{margin:0 0 8px;font:700 .72rem 'Space Mono';text-transform:uppercase}
+.photo-preview{position:relative;min-height:190px;border:2px dashed var(--muted);display:flex;align-items:center;justify-content:center;background:#e9e6de;overflow:hidden;margin-bottom:10px}
+.photo-preview img{width:100%;height:190px;object-fit:cover;display:block}
+.photo-empty{font:.68rem 'Space Mono';color:var(--muted);text-align:center;padding:20px}
+.photo-meta{font:.62rem 'Space Mono';color:var(--muted);margin-top:7px;word-break:break-word}
+.photo-actions{display:flex;gap:6px;flex-wrap:wrap}
+.photo-hint{font-size:.75rem;line-height:1.5;color:var(--muted);margin:8px 0 0}
+.save-status{margin-top:12px;min-height:20px;font:.72rem 'Space Mono'}
+@media(max-width:800px){.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.full{grid-column:auto}.photo-section{grid-column:auto}.photo-grid{grid-template-columns:1fr}}
+@media(max-width:500px){.cards{grid-template-columns:1fr}}
+</style>
+</head>
+
+<body>
+
+<div id="login" style="max-width:420px;margin:12vh auto;display:none">
+<h1>Connexion admin</h1>
+<p class="muted">Connecte-toi avec le compte créé dans Supabase Authentication.</p>
+<div class="form">
+<div class="field"><label>Email</label><input id="email" type="email" autocomplete="email"></div>
+<div class="field" style="margin-top:12px"><label>Mot de passe</label><input id="password" type="password" autocomplete="current-password"></div>
+<button class="btn" id="loginBtn" style="margin-top:14px">Se connecter</button>
+<p id="loginMsg" class="muted"></p>
+</div>
+</div>
+
+<div class="wrap" id="app" style="display:none">
+<header>
+<div class="logo">SENIOR <em>DROP</em> / ADMIN</div>
+<div class="actions">
+<a class="btn alt" href="index.html">Boutique</a>
+<button class="btn" id="export">Exporter JSON</button>
+<button class="btn alt" id="logout">Déconnexion</button>
+</div>
+</header>
+
+<div class="notice">
+<strong>Administration connectée à Supabase.</strong>
+Les produits et commandes sont stockés dans la base en ligne.
+Les photos produits sont stockées dans le bucket public <strong>product-images</strong>.
+</div>
+
+<div class="tabs">
+<button class="tab active" data-v="dashboard">Dashboard</button>
+<button class="tab" data-v="products">Produits</button>
+<button class="tab" data-v="orders">Commandes</button>
+</div>
+
+<section id="dashboard" class="view active">
+<h1>Dashboard</h1>
+<div class="cards">
+<div class="metric"><b id="mp">0</b><span>Produits</span></div>
+<div class="metric"><b id="ms">0</b><span>Stock</span></div>
+<div class="metric"><b id="mo">0</b><span>Commandes</span></div>
+<div class="metric"><b id="mv">0</b><span>Total commandes</span></div>
+</div>
+<h2 style="margin-top:28px">Stock faible</h2>
+<div id="low"></div>
+</section>
+
+<section id="products" class="view">
+<div class="actions" style="justify-content:space-between;margin-bottom:16px">
+<div><h1>Produits</h1><p class="mono muted">Prix, variantes, stock et photos.</p></div>
+<button class="btn" id="new">+ Ajouter</button>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Photo</th><th>Produit</th><th>Prix</th><th>Catégorie</th><th>Stock</th><th>Tailles</th><th>Actions</th></tr></thead>
+<tbody id="ptable"></tbody>
+</table>
+</div>
+</section>
+
+<section id="editor" class="view">
+<h1 id="et">Ajouter un produit</h1>
+<div class="form">
+<div class="grid">
+<div class="field"><label>Nom</label><input id="n"></div>
+<div class="field"><label>Prix FCFA</label><input id="p" type="number"></div>
+<div class="field"><label>Matière</label><input id="m"></div>
+<div class="field"><label>Badge</label><input id="t"></div>
+<div class="field">
+<label>Catégorie</label>
+<select id="c">
+<option value="hauts">Hauts</option>
+<option value="bas">Bas</option>
+<option value="accessoires">Accessoires</option>
+</select>
+</div>
+<div class="field"><label>Stock</label><input id="s" type="number"></div>
+<div class="field"><label>Couleur visuelle</label><input id="col" placeholder="#333333"></div>
+<div class="field"><label>Tailles</label><input id="sizes" placeholder="S,M,L,XL"></div>
+<div class="field"><label>Couleurs</label><input id="colors" placeholder="Noir,Gris"></div>
+<div class="field full"><label>Description</label><textarea id="d"></textarea></div>
+
+<div class="photo-section">
+<h2>Photos du produit</h2>
+<p class="photo-hint">Maximum 2 photos. La photo 1 est la photo principale. Formats recommandés : JPG, PNG ou WebP. Taille maximale : 5 Mo par photo.</p>
+
+<div class="photo-grid">
+<div class="photo-box">
+<h3>Photo 1 — principale</h3>
+<div class="photo-preview" id="photoPreview1"><div class="photo-empty">Aucune photo sélectionnée</div></div>
+<input id="image1" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+<div class="photo-meta" id="photoMeta1"></div>
+<div class="photo-actions" style="margin-top:8px">
+<button type="button" class="btn small alt" id="removeImage1">Supprimer la photo</button>
+</div>
+</div>
+
+<div class="photo-box">
+<h3>Photo 2 — facultative</h3>
+<div class="photo-preview" id="photoPreview2"><div class="photo-empty">Aucune deuxième photo</div></div>
+<input id="image2" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+<div class="photo-meta" id="photoMeta2"></div>
+<div class="photo-actions" style="margin-top:8px">
+<button type="button" class="btn small alt" id="removeImage2">Supprimer la photo</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="actions" style="margin-top:16px">
+<button class="btn" id="save">Enregistrer</button>
+<button class="btn alt" id="cancel">Annuler</button>
+</div>
+<p id="saveStatus" class="save-status muted"></p>
+</div>
+</section>
+
+<section id="orders" class="view">
+<div class="actions" style="justify-content:space-between;margin-bottom:16px">
+<div><h1>Commandes</h1><p class="mono muted">Commandes enregistrées depuis la boutique.</p></div>
+<button class="btn danger" id="clear">Effacer</button>
+</div>
+<div id="olist"></div>
+</section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="supabase-client.js"></script>
+
+<script>
+let editing=null;
+let PRODUCTS=[];
+let ORDERS=[];
+
+/* ============================================================
+   PHOTOS
+============================================================ */
+const STORAGE_BUCKET='product-images';
+const MAX_IMAGE_SIZE=5*1024*1024;
+
+let photoState={
+  1:{url:'',file:null,remove:false},
+  2:{url:'',file:null,remove:false}
+};
+
+const $=x=>document.getElementById(x);
+const money=n=>new Intl.NumberFormat('fr-FR').format(Number(n)||0)+' FCFA';
+const esc=x=>String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+
+function setSaveStatus(message='',type='muted'){
+  $('saveStatus').className='save-status '+type;
+  $('saveStatus').textContent=message;
+}
+
+function resetPhotoState(){
+  photoState={
+    1:{url:'',file:null,remove:false},
+    2:{url:'',file:null,remove:false}
+  };
+  ['image1','image2'].forEach(id=>$(id).value='');
+  renderPhotoPreview(1);
+  renderPhotoPreview(2);
+}
+
+function renderPhotoPreview(slot){
+  const state=photoState[slot];
+  const preview=$('photoPreview'+slot);
+  const meta=$('photoMeta'+slot);
+
+  if(state.file){
+    const objectUrl=URL.createObjectURL(state.file);
+    preview.innerHTML='<img src="'+objectUrl+'" alt="Aperçu photo '+slot+'">';
+    meta.textContent=state.file.name+' — '+formatBytes(state.file.size);
+    return;
+  }
+
+  if(state.url && !state.remove){
+    preview.innerHTML='<img src="'+esc(state.url)+'" alt="Photo produit '+slot+'">';
+    meta.textContent='Photo actuellement enregistrée';
+    return;
+  }
+
+  preview.innerHTML='<div class="photo-empty">'+(slot===1?'Aucune photo sélectionnée':'Aucune deuxième photo')+'</div>';
+  meta.textContent='';
+}
+
+function formatBytes(bytes){
+  if(bytes<1024*1024) return Math.round(bytes/1024)+' Ko';
+  return (bytes/(1024*1024)).toFixed(1)+' Mo';
+}
+
+function handleImageSelect(slot,file){
+  if(!file) return;
+
+  if(!file.type.startsWith('image/')){
+    alert('Veuillez sélectionner une image.');
+    $('image'+slot).value='';
+    return;
+  }
+
+  if(file.size>MAX_IMAGE_SIZE){
+    alert('La photo dépasse 5 Mo. Choisissez une image plus légère.');
+    $('image'+slot).value='';
+    return;
+  }
+
+  photoState[slot].file=file;
+  photoState[slot].remove=false;
+  renderPhotoPreview(slot);
+}
+
+function getStoragePathFromPublicUrl(url){
+  if(!url) return null;
+  const marker='/storage/v1/object/public/'+STORAGE_BUCKET+'/';
+  const index=url.indexOf(marker);
+  if(index===-1) return null;
+  return decodeURIComponent(url.slice(index+marker.length).split('?')[0]);
+}
+
+async function deleteStorageFileByUrl(url){
+  const path=getStoragePathFromPublicUrl(url);
+  if(!path) return;
+  const {error}=await SD_DB.storage.from(STORAGE_BUCKET).remove([path]);
+  if(error) console.warn('Suppression ancienne image:',error);
+}
+
+async function uploadProductImage(file,productId,slot){
+  const extension=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+  const safeId=String(productId).replace(/[^a-zA-Z0-9_-]/g,'-');
+  const path=safeId+'/'+slot+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+'.'+extension;
+
+  const {error}=await SD_DB.storage.from(STORAGE_BUCKET).upload(path,file,{
+    cacheControl:'3600',
+    upsert:false,
+    contentType:file.type||'image/jpeg'
+  });
+
+  if(error) throw error;
+
+  const {data}=SD_DB.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+  if(!data?.publicUrl) throw new Error('Impossible de générer l’URL publique de la photo.');
+  return data.publicUrl;
+}
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+function view(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===v));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.v===v));
+}
+document.querySelectorAll('.tab').forEach(x=>x.onclick=()=>{view(x.dataset.v);refresh();});
+
+/* ============================================================
+   CHARGEMENT DES DONNÉES
+============================================================ */
+async function loadData(){
+  const {data:p,error:pe}=await SD_DB.from('products').select('*').order('created_at',{ascending:true});
+  if(pe) throw pe;
+
+  const {data:o,error:oe}=await SD_DB.from('orders').select('*').order('created_at',{ascending:false});
+  if(oe) throw oe;
+
+  PRODUCTS=p||[];
+  ORDERS=o||[];
+  refresh();
+}
+
+/* ============================================================
+   RAFRAÎCHISSEMENT INTERFACE
+============================================================ */
+function refresh(){
+  $('mp').textContent=PRODUCTS.length;
+  $('ms').textContent=PRODUCTS.reduce((a,x)=>a+(+x.stock||0),0);
+  $('mo').textContent=ORDERS.length;
+  $('mv').textContent=money(ORDERS.reduce((a,x)=>a+(+x.total||0),0));
+
+  $('ptable').innerHTML=PRODUCTS.map(x=>`
+    <tr>
+      <td>
+        ${x.image_url_1
+          ? `<img class="product-thumb" src="${esc(x.image_url_1)}" alt="${esc(x.name)}">`
+          : `<div class="no-photo">Pas de photo</div>`
+        }
+        ${x.image_url_2 ? '<small class="mono muted">+ 1 photo</small>' : ''}
+      </td>
+      <td>
+        <b>${esc(x.name)}</b><br>
+        <small>${esc(x.material||'')}</small>
+      </td>
+      <td>${money(x.price)}</td>
+      <td>${esc(x.category)}</td>
+      <td class="${x.stock<=5?'low':''}">${x.stock}</td>
+      <td>${(x.sizes||[]).map(esc).join(', ')}</td>
+      <td>
+        <div class="actions">
+          <button class="btn small" onclick="edit('${esc(x.id)}')">Modifier</button>
+          <button class="btn small danger" onclick="delProduct('${esc(x.id)}')">Supprimer</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  const low=PRODUCTS.filter(x=>x.stock<=5);
+  $('low').innerHTML=low.length
+    ?low.map(x=>`<div class="order"><b>${esc(x.name)}</b> — <span class="low">${x.stock} restant(s)</span></div>`).join('')
+    :'<p class="muted">Aucune alerte.</p>';
+
+  $('olist').innerHTML=ORDERS.length
+    ?ORDERS.map(x=>`
+      <div class="order">
+        <div class="orderhead">
+          <b>${esc(x.id)}</b>
+          <span class="status">${esc(x.status)}</span>
+        </div>
+        <p class="mono muted">${new Date(x.created_at).toLocaleString('fr-FR')}</p>
+        <p>
+          <b>${esc(x.customer_name)}</b> · ${esc(x.customer_phone)}<br>
+          ${esc(x.customer_address)}<br>
+          ${esc(x.customer_note||'')}
+        </p>
+        ${(x.items||[]).map(i=>`
+          <div class="item">
+            ${esc(i.name)} — ${esc(i.size)} / ${esc(i.color)} × ${i.qty} — ${money(i.price*i.qty)}
+          </div>
+        `).join('')}
+        <p class="mono"><b>${money(x.total)}</b></p>
+        <div class="actions">
+          <button class="btn small" onclick="setStatus('${esc(x.id)}','Confirmée')">Confirmer</button>
+          <button class="btn small alt" onclick="setStatus('${esc(x.id)}','Livrée')">Livrée</button>
+          <button class="btn small danger" onclick="delOrder('${esc(x.id)}')">Supprimer</button>
+        </div>
+      </div>
+    `).join('')
+    :'<p class="muted">Aucune commande enregistrée.</p>';
+}
+
+/* ============================================================
+   PRODUITS
+============================================================ */
+function clearForm(){
+  ['n','p','m','t','s','col','sizes','colors','d'].forEach(x=>$(x).value='');
+  $('c').value='hauts';
+  editing=null;
+  $('et').textContent='Ajouter un produit';
+  setSaveStatus('');
+  resetPhotoState();
+}
+
+function edit(id){
+  const x=PRODUCTS.find(x=>x.id===id);
+  if(!x) return;
+
+  editing=id;
+  $('et').textContent='Modifier le produit';
+  $('n').value=x.name;
+  $('p').value=x.price;
+  $('m').value=x.material||'';
+  $('t').value=x.tag||'';
+  $('c').value=x.category;
+  $('s').value=x.stock;
+  $('col').value=x.color||'#333333';
+  $('sizes').value=(x.sizes||[]).join(',');
+  $('colors').value=(x.colors||[]).join(',');
+  $('d').value=x.description||'';
+
+  resetPhotoState();
+  photoState[1].url=x.image_url_1||'';
+  photoState[2].url=x.image_url_2||'';
+  renderPhotoPreview(1);
+  renderPhotoPreview(2);
+
+  view('editor');
+}
+
+$('new').onclick=()=>{clearForm();view('editor');};
+$('cancel').onclick=()=>{clearForm();view('products');};
+
+$('image1').addEventListener('change',e=>handleImageSelect(1,e.target.files[0]));
+$('image2').addEventListener('change',e=>handleImageSelect(2,e.target.files[0]));
+
+$('removeImage1').onclick=()=>{
+  photoState[1].file=null;
+  photoState[1].remove=!!photoState[1].url;
+  photoState[1].url=photoState[1].remove?'':photoState[1].url;
+  $('image1').value='';
+  renderPhotoPreview(1);
+};
+
+$('removeImage2').onclick=()=>{
+  photoState[2].file=null;
+  photoState[2].remove=!!photoState[2].url;
+  photoState[2].url=photoState[2].remove?'':photoState[2].url;
+  $('image2').value='';
+  renderPhotoPreview(2);
+};
+
+$('save').onclick=async()=>{
+  const name=$('n').value.trim();
+  if(!name){alert('Nom obligatoire');return;}
+
+  const saveBtn=$('save');
+  saveBtn.disabled=true;
+  setSaveStatus('Enregistrement du produit...','muted');
+
+  const id=editing||name.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+Date.now().toString().slice(-4);
+
+  const existing=editing?PRODUCTS.find(p=>p.id===editing):null;
+  const oldUrls={
+    1:existing?.image_url_1||'',
+    2:existing?.image_url_2||''
+  };
+
+  const uploadedNewUrls=[];
+  let imageUrl1=photoState[1].remove?'':(photoState[1].url||'');
+  let imageUrl2=photoState[2].remove?'':(photoState[2].url||'');
+
+  try{
+    if(photoState[1].file){
+      setSaveStatus('Envoi de la photo 1...','muted');
+      imageUrl1=await uploadProductImage(photoState[1].file,id,1);
+      uploadedNewUrls.push(imageUrl1);
+    }
+
+    if(photoState[2].file){
+      setSaveStatus('Envoi de la photo 2...','muted');
+      imageUrl2=await uploadProductImage(photoState[2].file,id,2);
+      uploadedNewUrls.push(imageUrl2);
+    }
+
+    const x={
+      id,
+      name,
+      price:+$('p').value||0,
+      material:$('m').value,
+      tag:$('t').value,
+      category:$('c').value,
+      stock:+$('s').value||0,
+      color:$('col').value||'#333333',
+      sizes:$('sizes').value.split(',').map(x=>x.trim()).filter(Boolean),
+      colors:$('colors').value.split(',').map(x=>x.trim()).filter(Boolean),
+      description:$('d').value,
+      image_url_1:imageUrl1||null,
+      image_url_2:imageUrl2||null,
+      active:true
+    };
+
+    setSaveStatus('Enregistrement dans Supabase...','muted');
+
+    const r=editing
+      ?await SD_DB.from('products').update(x).eq('id',id)
+      :await SD_DB.from('products').insert(x);
+
+    if(r.error) throw r.error;
+
+    /* Supprimer les anciennes photos uniquement après succès DB. */
+    if(editing){
+      if(oldUrls[1]&&oldUrls[1]!==imageUrl1) await deleteStorageFileByUrl(oldUrls[1]);
+      if(oldUrls[2]&&oldUrls[2]!==imageUrl2) await deleteStorageFileByUrl(oldUrls[2]);
+    }
+
+    setSaveStatus('Produit enregistré avec succès.','success');
+    clearForm();
+    view('products');
+    await loadData();
+
+  }catch(error){
+    console.error(error);
+
+    /* Nettoyage des nouveaux fichiers si l'enregistrement DB échoue. */
+    for(const url of uploadedNewUrls){
+      await deleteStorageFileByUrl(url);
+    }
+
+    setSaveStatus('Erreur : '+(error?.message||'Impossible d’enregistrer le produit.'),'error');
+    alert(error?.message||'Impossible d’enregistrer le produit.');
+  }finally{
+    saveBtn.disabled=false;
+  }
+};
+
+async function delProduct(id){
+  if(!confirm('Supprimer ce produit ?')) return;
+
+  const product=PRODUCTS.find(p=>p.id===id);
+
+  const {error}=await SD_DB.from('products').delete().eq('id',id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  /* Nettoyage des photos liées au produit. */
+  if(product?.image_url_1) await deleteStorageFileByUrl(product.image_url_1);
+  if(product?.image_url_2) await deleteStorageFileByUrl(product.image_url_2);
+
+  await loadData();
+}
+
+/* ============================================================
+   COMMANDES
+============================================================ */
+async function setStatus(id,status){
+  const {error}=await SD_DB.from('orders').update({status}).eq('id',id);
+  if(error) alert(error.message);
+  else await loadData();
+}
+
+async function delOrder(id){
+  if(!confirm('Supprimer cette commande ?')) return;
+  const {error}=await SD_DB.from('orders').delete().eq('id',id);
+  if(error) alert(error.message);
+  else await loadData();
+}
+
+$('clear').onclick=async()=>{
+  if(!confirm('Effacer toutes les commandes ?')) return;
+  const {error}=await SD_DB.from('orders').delete().not('id','is',null);
+  if(error) alert(error.message);
+  else await loadData();
+};
+
+/* ============================================================
+   EXPORT
+============================================================ */
+$('export').onclick=()=>{
+  const b=new Blob(
+    [JSON.stringify({products:PRODUCTS,orders:ORDERS},null,2)],
+    {type:'application/json'}
+  );
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(b);
+  a.download='senior-drop-backup.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+/* ============================================================
+   CONNEXION
+============================================================ */
+$('loginBtn').onclick=async()=>{
+  if(!SD_DB){
+    $('loginMsg').textContent='Configure d’abord supabase-config.js';
+    return;
+  }
+
+  const email=$('email').value.trim();
+  const password=$('password').value;
+
+  if(!email||!password){
+    $('loginMsg').className='error';
+    $('loginMsg').textContent='Email et mot de passe obligatoires.';
+    return;
+  }
+
+  $('loginBtn').disabled=true;
+  $('loginMsg').className='muted';
+  $('loginMsg').textContent='Connexion...';
+
+  const {error}=await SD_DB.auth.signInWithPassword({email,password});
+
+  $('loginBtn').disabled=false;
+
+  if(error){
+    $('loginMsg').className='error';
+    $('loginMsg').textContent=error.message;
+    return;
+  }
+
+  await boot();
+};
+
+/* ============================================================
+   VERIFICATION ADMIN
+============================================================ */
+async function checkAdmin(){
+  const {data:{user},error:userError}=await SD_DB.auth.getUser();
+  if(userError) throw userError;
+  if(!user) return false;
+
+  const {data,error}=await SD_DB.rpc('is_admin');
+  if(error){
+    console.error('Erreur RPC is_admin:',error);
+    throw error;
+  }
+
+  return data===true;
+}
+
+/* ============================================================
+   DEMARRAGE SECURISE
+============================================================ */
+async function boot(){
+  if(!SD_DB){
+    $('login').style.display='block';
+    $('app').style.display='none';
+    $('loginMsg').className='error';
+    $('loginMsg').textContent='Supabase n’est pas encore configuré.';
+    return;
+  }
+
+  const {data:{session},error:sessionError}=await SD_DB.auth.getSession();
+
+  if(sessionError){
+    $('login').style.display='block';
+    $('app').style.display='none';
+    $('loginMsg').className='error';
+    $('loginMsg').textContent=sessionError.message;
+    return;
+  }
+
+  if(!session){
+    $('login').style.display='block';
+    $('app').style.display='none';
+    return;
+  }
+
+  $('login').style.display='block';
+  $('app').style.display='none';
+  $('loginMsg').className='muted';
+  $('loginMsg').textContent='Vérification des droits administrateur...';
+
+  try{
+    const isAdmin=await checkAdmin();
+
+    if(!isAdmin){
+      $('app').style.display='none';
+      $('login').style.display='block';
+      $('loginMsg').className='error';
+      $('loginMsg').textContent='Accès refusé : ce compte n’est pas administrateur de Senior Drop.';
+      await SD_DB.auth.signOut();
+      return;
+    }
+
+    $('login').style.display='none';
+    $('app').style.display='block';
+
+    await loadData();
+
+  }catch(error){
+    console.error('Erreur de vérification admin:',error);
+    $('app').style.display='none';
+    $('login').style.display='block';
+    $('loginMsg').className='error';
+    $('loginMsg').textContent='Impossible de vérifier les droits administrateur : '+(error?.message||'Erreur inconnue.');
+  }
+}
+
+/* ============================================================
+   DECONNEXION
+============================================================ */
+$('logout').onclick=async()=>{
+  await SD_DB.auth.signOut();
+  $('app').style.display='none';
+  $('login').style.display='block';
+  $('email').value='';
+  $('password').value='';
+  $('loginMsg').className='muted';
+  $('loginMsg').textContent='';
+};
+
+/* ============================================================
+   CHANGEMENT DE SESSION
+============================================================ */
+SD_DB?.auth.onAuthStateChange((event,session)=>{
+  if(event==='SIGNED_OUT'){
+    $('app').style.display='none';
+    $('login').style.display='block';
+  }
+});
+
+/* ============================================================
+   LANCEMENT
+============================================================ */
+boot();
+</script>
+</body>
+</html>
